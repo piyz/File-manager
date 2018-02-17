@@ -27,7 +27,6 @@ public class FileManager extends JPanel{
                     node.add(new DefaultMutableTreeNode(file));
             }
         }
-        System.out.println("etetet");
 
         tree = new JTree();
         tree.setModel(model);
