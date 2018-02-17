@@ -10,6 +10,7 @@ public class FileManager extends JPanel{
 
     private JTree tree;
     private static FileSystemView fsv = FileSystemView.getFileSystemView();
+    private static boolean useSystemLookAndFeel = true;
 
     private FileManager() {
         DefaultMutableTreeNode treeNode = new DefaultMutableTreeNode();
@@ -36,6 +37,15 @@ public class FileManager extends JPanel{
     }
 
     private static void createAndShowGUI(){
+        if (useSystemLookAndFeel) {
+            try {
+                UIManager.setLookAndFeel(
+                        UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception e) {
+                System.err.println("Couldn't use system look and feel.");
+            }
+        }
+
         //Create and set up the window.
         JFrame frame = new JFrame("FileManager");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
