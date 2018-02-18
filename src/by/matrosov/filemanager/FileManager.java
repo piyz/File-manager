@@ -2,17 +2,22 @@ package by.matrosov.filemanager;
 
 import javax.swing.*;
 import javax.swing.event.TreeModelListener;
+import javax.swing.filechooser.FileSystemView;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.io.File;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 public class FileManager extends JPanel{
 
     private JTree tree;
+    private static FileSystemView fsv = FileSystemView.getFileSystemView();
 
     private static class FileTreeModel implements TreeNode{
 
@@ -89,10 +94,49 @@ public class FileManager extends JPanel{
         }
     }
 
+    private static class FileTreeCellRenderer extends DefaultTreeCellRenderer{
+        private Map<String, Icon> iconCache = new HashMap<>();
+        private Map<File, String> rootNameCache = new HashMap<>();
+
+        @Override
+        public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+            FileTreeModel fileTreeModel = (FileTreeModel) value;
+            File file = fileTreeModel.file;
+            String filename = "";
+            if (file != null) {
+                if (fileTreeModel.isFileSystemRoot) {
+                    // long start = System.currentTimeMillis();
+                    filename = this.rootNameCache.get(file);
+                    if (filename == null) {
+                        filename = fsv.getSystemDisplayName(file);
+                        this.rootNameCache.put(file, filename);
+                    }
+                    // long end = System.currentTimeMillis();
+                    // System.out.println(filename + ":" + (end - start));
+                } else {
+                    filename = file.getName();
+                }
+            }
+            JLabel result = (JLabel) super.getTreeCellRendererComponent(tree,
+                    filename, sel, expanded, leaf, row, hasFocus);
+            if (file != null) {
+                Icon icon = this.iconCache.get(filename);
+                if (icon == null) {
+                    // System.out.println("Getting icon of " + filename);
+                    icon = fsv.getSystemIcon(file);
+                    this.iconCache.put(filename, icon);
+                }
+                result.setIcon(icon);
+            }
+            return result;
+        }
+    }
+
     private FileManager() {
         File[] roots = File.listRoots();
         FileTreeModel model = new FileTreeModel(roots);
         tree = new JTree(model);
+        tree.setCellRenderer(new FileTreeCellRenderer());
         JScrollPane scrollPane = new JScrollPane(tree);
         add(scrollPane);
     }
