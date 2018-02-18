@@ -1,50 +1,71 @@
 package by.matrosov.filemanager;
 
 import javax.swing.*;
-import javax.swing.filechooser.FileSystemView;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
+import javax.swing.event.TreeModelListener;
+import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreePath;
 import java.io.File;
 
 public class FileManager extends JPanel{
 
     private JTree tree;
-    private static FileSystemView fsv = FileSystemView.getFileSystemView();
-    private static boolean useSystemLookAndFeel = true;
 
-    private FileManager() {
-        DefaultMutableTreeNode treeNode = new DefaultMutableTreeNode();
-        DefaultTreeModel model = new DefaultTreeModel(treeNode);
+    private static class FileTreeModel implements TreeModel{
 
-        File[] roots = fsv.getRoots();
-        for (File f : roots) {
-            DefaultMutableTreeNode node = new DefaultMutableTreeNode(f);
-            treeNode.add(node);
+        public FileTreeModel(File[] roots) {
 
-            File[] files = fsv.getFiles(f, true);
-            for (File file : files) {
-                if (file.isDirectory())
-                    node.add(new DefaultMutableTreeNode(file));
-            }
         }
 
-        tree = new JTree();
-        tree.setModel(model);
+        @Override
+        public Object getRoot() {
+            return null;
+        }
 
-        //Create the scroll and add the tree to it.
-        JScrollPane scroll = new JScrollPane(tree);
-        add(scroll);
+        @Override
+        public Object getChild(Object parent, int index) {
+            return null;
+        }
+
+        @Override
+        public int getChildCount(Object parent) {
+            return 0;
+        }
+
+        @Override
+        public boolean isLeaf(Object node) {
+            return false;
+        }
+
+        @Override
+        public void valueForPathChanged(TreePath path, Object newValue) {
+
+        }
+
+        @Override
+        public int getIndexOfChild(Object parent, Object child) {
+            return 0;
+        }
+
+        @Override
+        public void addTreeModelListener(TreeModelListener l) {
+
+        }
+
+        @Override
+        public void removeTreeModelListener(TreeModelListener l) {
+
+        }
+    }
+
+    private FileManager() {
+        File[] roots = File.listRoots();
+        FileTreeModel model = new FileTreeModel(roots);
+        tree = new JTree(model);
+        JScrollPane scrollPane = new JScrollPane(tree);
+        add(scrollPane);
     }
 
     private static void createAndShowGUI(){
-        if (useSystemLookAndFeel) {
-            try {
-                UIManager.setLookAndFeel(
-                        UIManager.getSystemLookAndFeelClassName());
-            } catch (Exception e) {
-                System.err.println("Couldn't use system look and feel.");
-            }
-        }
 
         //Create and set up the window.
         JFrame frame = new JFrame("FileManager");
@@ -54,6 +75,7 @@ public class FileManager extends JPanel{
         frame.add(new FileManager());
 
         //Display the window.
+        frame.setLocationRelativeTo(null);
         frame.pack();
         frame.setVisible(true);
     }
