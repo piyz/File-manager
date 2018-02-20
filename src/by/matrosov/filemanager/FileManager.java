@@ -13,8 +13,7 @@ import java.util.Vector;
 
 public class FileManager extends JPanel{
 
-    public static final ImageIcon ICON_FOLDER = new ImageIcon("folder.gif");
-    public static final ImageIcon ICON_EXPANDEDFOLDER = new ImageIcon("expandedfolder.gif");
+
 
     private JTree tree;
     private static FileSystemView fsv = FileSystemView.getFileSystemView();
@@ -142,8 +141,8 @@ public class FileManager extends JPanel{
             for (int i=0; i<v.size(); i++)
             {
                 FileNode nd = (FileNode)v.elementAt(i);
-                IconData idata = new IconData(FileManager.ICON_FOLDER, FileManager.ICON_EXPANDEDFOLDER, nd);
-                DefaultMutableTreeNode node = new DefaultMutableTreeNode(idata);
+                //IconData idata = new IconData(nd);
+                DefaultMutableTreeNode node = new DefaultMutableTreeNode(nd);
                 parent.add(node);
 
                 if (nd.hasSubDirs())
@@ -154,46 +153,7 @@ public class FileManager extends JPanel{
         }
     }
 
-    private static class IconData
-    {
-        Icon   m_icon;
-        Icon   m_expandedIcon;
-        Object m_data;
 
-        public IconData(Icon icon, Object data)
-        {
-            m_icon = icon;
-            m_expandedIcon = null;
-            m_data = data;
-        }
-
-        public IconData(Icon icon, Icon expandedIcon, Object data)
-        {
-            m_icon = icon;
-            m_expandedIcon = expandedIcon;
-            m_data = data;
-        }
-
-        public Icon getIcon()
-        {
-            return m_icon;
-        }
-
-        public Icon getExpandedIcon()
-        {
-            return m_expandedIcon!=null ? m_expandedIcon : m_icon;
-        }
-
-        public Object getObject()
-        {
-            return m_data;
-        }
-
-        public String toString()
-        {
-            return m_data.toString();
-        }
-    }
 
     private DefaultMutableTreeNode getTreeNode(TreePath path)
     {
@@ -205,8 +165,7 @@ public class FileManager extends JPanel{
         if (node == null)
             return null;
         Object obj = node.getUserObject();
-        if (obj instanceof IconData)
-            obj = ((IconData)obj).getObject();
+
         if (obj instanceof FileNode)
             return (FileNode)obj;
         else
