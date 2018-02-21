@@ -8,6 +8,7 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -52,7 +53,7 @@ public class FileManager extends JPanel{
         JPopupMenu popupMenu = new JPopupMenu();
 
         //expand, collapse
-        Action action = new AbstractAction() {
+        Action action1 = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (currentPath == null)
@@ -63,7 +64,16 @@ public class FileManager extends JPanel{
                     tree.expandPath(currentPath);
             }
         };
-        popupMenu.add(action);
+
+        Action action2 = new AbstractAction("Delete") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                model.removeNodeFromParent((MutableTreeNode) tree.getLastSelectedPathComponent());
+            }
+        };
+
+        popupMenu.add(action1);
+        popupMenu.add(action2);
 
         //for popup menu
         class PopupTrigger extends MouseAdapter
@@ -78,9 +88,9 @@ public class FileManager extends JPanel{
                     if (path != null)
                     {
                         if (tree.isExpanded(path))
-                            action.putValue(Action.NAME, "Collapse");
+                            action1.putValue(Action.NAME, "Collapse");
                         else
-                            action.putValue(Action.NAME, "Expand");
+                            action1.putValue(Action.NAME, "Expand");
                         popupMenu.show(tree, x, y);
                         currentPath = path;
                     }
