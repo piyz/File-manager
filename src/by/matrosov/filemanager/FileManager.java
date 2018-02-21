@@ -3,6 +3,8 @@ package by.matrosov.filemanager;
 import javax.swing.*;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -12,8 +14,6 @@ import java.io.File;
 import java.util.Vector;
 
 public class FileManager extends JPanel{
-
-
 
     private JTree tree;
     private static FileSystemView fsv = FileSystemView.getFileSystemView();
@@ -38,12 +38,15 @@ public class FileManager extends JPanel{
 
         tree.addTreeExpansionListener(new DirExpansionListener());
 
+        //tree.setEditable(true);
+        //model.addTreeModelListener(new MyTreeModelListener());
+
         //Create the scroll and add the tree to it.
         JScrollPane scroll = new JScrollPane(tree);
         add(scroll);
     }
 
-    private static class FileNode
+    private class FileNode
     {
         File m_file;
 
@@ -153,26 +156,24 @@ public class FileManager extends JPanel{
         }
     }
 
+    private class DirExpansionListener implements TreeExpansionListener{
 
+        private DefaultMutableTreeNode getTreeNode(TreePath path)
+        {
+            return (DefaultMutableTreeNode)(path.getLastPathComponent());
+        }
 
-    private DefaultMutableTreeNode getTreeNode(TreePath path)
-    {
-        return (DefaultMutableTreeNode)(path.getLastPathComponent());
-    }
+        private FileNode getFileNode(DefaultMutableTreeNode node)
+        {
+            if (node == null)
+                return null;
+            Object obj = node.getUserObject();
 
-    private FileNode getFileNode(DefaultMutableTreeNode node)
-    {
-        if (node == null)
-            return null;
-        Object obj = node.getUserObject();
-
-        if (obj instanceof FileNode)
-            return (FileNode)obj;
-        else
-            return null;
-    }
-
-    class DirExpansionListener implements TreeExpansionListener{
+            if (obj instanceof FileNode)
+                return (FileNode)obj;
+            else
+                return null;
+        }
 
         @Override
         public void treeExpanded(TreeExpansionEvent event) {
@@ -195,6 +196,40 @@ public class FileManager extends JPanel{
 
         }
     }
+
+    /*
+
+    private class MyTreeModelListener implements TreeModelListener{
+
+        @Override
+        public void treeNodesChanged(TreeModelEvent e) {
+            DefaultMutableTreeNode node;
+            node = (DefaultMutableTreeNode)(e.getTreePath().getLastPathComponent());
+
+            int index = e.getChildIndices()[0];
+            node = (DefaultMutableTreeNode)(node.getChildAt(index));
+
+            System.out.println("The user has finished editing the node.");
+            System.out.println("New value: " + node.getUserObject());
+        }
+
+        @Override
+        public void treeNodesInserted(TreeModelEvent e) {
+
+        }
+
+        @Override
+        public void treeNodesRemoved(TreeModelEvent e) {
+
+        }
+
+        @Override
+        public void treeStructureChanged(TreeModelEvent e) {
+
+        }
+    }
+
+    */
 
     private static void createAndShowGUI(){
         if (useSystemLookAndFeel) {
