@@ -10,6 +10,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.Vector;
 
@@ -18,8 +21,9 @@ public class FileManager extends JPanel{
     private JTree tree;
     private static FileSystemView fsv = FileSystemView.getFileSystemView();
     private static boolean useSystemLookAndFeel = true;
-
     private DefaultTreeModel model;
+
+    private TreePath currentPath;
 
     private FileManager() {
         setLayout(new BorderLayout());
@@ -41,10 +45,55 @@ public class FileManager extends JPanel{
         //tree.setEditable(true);
         //model.addTreeModelListener(new MyTreeModelListener());
 
-        //Create the scroll and add the tree to it.
         JScrollPane scroll = new JScrollPane(tree);
         add(scroll);
+
+        //----------------------add popup menu
+        JPopupMenu popupMenu = new JPopupMenu();
+
+        //expand, collapse
+        Action action = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (currentPath == null)
+                    return;
+                if (tree.isExpanded(currentPath))
+                    tree.collapsePath(currentPath);
+                else
+                    tree.expandPath(currentPath);
+            }
+        };
+        popupMenu.add(action);
+
+        //for popup menu
+        class PopupTrigger extends MouseAdapter
+        {
+            public void mouseReleased(MouseEvent e)
+            {
+                if (e.isPopupTrigger())
+                {
+                    int x = e.getX();
+                    int y = e.getY();
+                    TreePath path = tree.getPathForLocation(x, y);
+                    if (path != null)
+                    {
+                        if (tree.isExpanded(path))
+                            action.putValue(Action.NAME, "Collapse");
+                        else
+                            action.putValue(Action.NAME, "Expand");
+                        popupMenu.show(tree, x, y);
+                        currentPath = path;
+                    }
+                }
+            }
+        }
+
+        tree.add(popupMenu);
+        tree.addMouseListener(new PopupTrigger());
+
     }
+
+
 
     private class FileNode
     {
