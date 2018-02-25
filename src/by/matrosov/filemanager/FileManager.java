@@ -2,20 +2,32 @@ package by.matrosov.filemanager;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
+import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.List;
 
-public class FileManager extends JPanel{
+public class FileManager extends JPanel implements ActionListener{
 
     private static FileSystemView fsv = FileSystemView.getFileSystemView();
     private DefaultTreeModel treeModel;
     private JTree tree;
+
+    private static String ADD_COMMAND = "add";
+    private static String REMOVE_COMMAND = "remove";
+    private static String CLEAR_COMMAND = "clear";
+
+    private Toolkit toolkit = Toolkit.getDefaultToolkit();
 
     private FileManager() {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode();
@@ -43,9 +55,65 @@ public class FileManager extends JPanel{
         tree = new JTree(treeModel);
         tree.setRootVisible(false);
         tree.addTreeSelectionListener(treeSelectionListener);
+        tree.setEditable(true);
+        treeModel.addTreeModelListener(new MyTreeModelListener());
 
         JScrollPane treeScroll = new JScrollPane(tree);
         add(treeScroll);
+
+        JButton removeButton = new JButton("Remove");
+        removeButton.setActionCommand(REMOVE_COMMAND);
+        removeButton.addActionListener(this);
+
+        add(removeButton);
+
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        String command = e.getActionCommand();
+        if (command.equals(REMOVE_COMMAND)){
+            TreePath currentSelection = tree.getSelectionPath();
+            if (currentSelection != null){
+                DefaultMutableTreeNode currentNode = (DefaultMutableTreeNode) currentSelection.getLastPathComponent();
+                MutableTreeNode parent = (MutableTreeNode) currentNode.getParent();
+                if (parent != null){
+                    treeModel.removeNodeFromParent(currentNode);
+                    return;
+                }
+            }
+            toolkit.beep();
+        }
+    }
+
+    private class MyTreeModelListener implements TreeModelListener{
+
+        @Override
+        public void treeNodesChanged(TreeModelEvent e) {
+            DefaultMutableTreeNode node;
+            node = (DefaultMutableTreeNode)(e.getTreePath().getLastPathComponent());
+
+            int index = e.getChildIndices()[0];
+            node = (DefaultMutableTreeNode)(node.getChildAt(index));
+
+            System.out.println("The user has finished editing the node.");
+            System.out.println("New value: " + node.getUserObject());
+        }
+
+        @Override
+        public void treeNodesInserted(TreeModelEvent e) {
+
+        }
+
+        @Override
+        public void treeNodesRemoved(TreeModelEvent e) {
+
+        }
+
+        @Override
+        public void treeStructureChanged(TreeModelEvent e) {
+
+        }
     }
 
     private void showChildren(final DefaultMutableTreeNode node){
